@@ -1,0 +1,21 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "d6cd7c6b-5389-4ce6-8c20-c9b85b2188fa": {
+      "ProjectGuid": "d6cd7c6b-5389-4ce6-8c20-c9b85b2188fa",
+      "DisplayName": "ClayShop",
+      "ColorIndex": 0
+    },
+    "80d752a3-0118-4b2e-b07d-4c8351782f8c": {
+      "ProjectGuid": "80d752a3-0118-4b2e-b07d-4c8351782f8c",
+      "DisplayName": "WebUI",
+      "ColorIndex": 1
+    },
+    "5848bfbf-b0d6-4085-81e8-0b1445de4544": {
+      "ProjectGuid": "5848bfbf-b0d6-4085-81e8-0b1445de4544",
+      "DisplayName": "WebAPI",
+      "ColorIndex": 2
+    }
+  },
+  "NextColorIndex": 3
+}
