@@ -10,105 +10,66 @@ namespace WebAPI.Controllers
     [ApiController]
     public class UserController : Controller
     {
-        //_________________________________________ Initialize ______________________________________________\\
+        //===================================================() Initialize ()===================================================\\
         private IBL _bl;
-        private IMemoryCache _memoryCache; //put in Ilogger
+        private IMemoryCache _memoryCacheC; //put in Ilogger
         private ILogger _logger;
 
         public UserController(IBL bl, IMemoryCache memoryCache)
         {
             _bl = bl;
-            _memoryCache = memoryCache;
+            _memoryCacheC = memoryCache;
         }
 
 
-        //---------------------------------------------------------------------------------------------------\\
+        //-----------------------------------------------<> GetAllCustomers <>--------------------------------------------------\\
         // GET: UserController
+        [HttpGet]
         public List<Customers> Get()//Get All
         {
             List<Customers> allCustomers;// = _bl.GetAllStores();
-            if (!_memoryCache.TryGetValue("Customers", out allCustomers))//null ref
+            if (!_memoryCacheC.TryGetValue("Customers", out allCustomers))//null ref
             {
                 allCustomers = _bl.GetAllCustomers();
-                _memoryCache.Set("customer", allCustomers, new TimeSpan(0, 0, 30));
+                _memoryCacheC.Set("customer", allCustomers, new TimeSpan(0, 0, 30));
             }
             return allCustomers;
         }
-       
-        //---------------------------------------------------------------------------------------------------\\
-        // GET: UserController/Details/5
-        public ActionResult Details(int id)
+
+
+        //--------------------------------------------<> GetCustomerByIdAsync <>-----------------------------------------------\\
+        // GET api/<StoreController>/5 Get value or something abse don id e.g 5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Customers>> GetAsync(int id)
         {
-            return View();
+            Customers foundCustomer = await _bl.GetCustomerByIdAsync(id);
+            if (foundCustomer.CustNumb != 0)
+            {
+                return Ok(foundCustomer);
+            }
+            else
+            {
+                return NoContent();
+            }
         }
 
-        //---------------------------------------------------------------------------------------------------\\
-        // GET: UserController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        //---------------------------------------------------------------------------------------------------\\
-        // POST: UserController/Create
+        //------------------------------------------------<> AddCustomer <>---------------------------------------------------\\
+        //public void AddCustomer(Customers addCust)
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult<Customers> Post([FromBody] Customers addCust)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                _bl.AddCustomer(addCust);
+                //Created 201
+                return Created("Good", addCust);
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                //Duplicate is 409, but I can't test that yet, don't know how
+                return Conflict(ex.Message);
             }
         }
 
-        //---------------------------------------------------------------------------------------------------\\
-        // GET: UserController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        //---------------------------------------------------------------------------------------------------\\
-        // POST: UserController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        //---------------------------------------------------------------------------------------------------\\
-        // GET: UserController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        //---------------------------------------------------------------------------------------------------\\
-        // POST: UserController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
     }
 }

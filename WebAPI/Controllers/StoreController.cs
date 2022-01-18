@@ -2,6 +2,7 @@
 using Models;
 using BL;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 //Need CRUD
@@ -11,7 +12,7 @@ namespace WebAPI.Controllers
     [ApiController]
     public class StoreController : ControllerBase
     {
-        //_________________________________________ Initialize ______________________________________________\\
+        //===================================================() Initialize ()===================================================\\
         private IBL _bl;
         private IMemoryCache _memoryCache; //put in Ilogger
         private ILogger _logger;
@@ -22,7 +23,7 @@ namespace WebAPI.Controllers
             _memoryCache = memoryCache;
         }
 
-        //---------------------------------------------------------------------------------------------------\\
+        //------------------------------------------------<> GetAllStores <>---------------------------------------------------\\
         // GET: api/<StoreController>  get a list
         [HttpGet]
         public List<Store> Get()//Get All
@@ -36,8 +37,8 @@ namespace WebAPI.Controllers
             return allStores;
         }
 
-        //---------------------------------------------------------------------------------------------------\\
-        // GET api/<StoreController>/5 Get value or something abse don id e.g 5
+        //---------------------------------------------<> GetStoreByIdAsync <>--------------------------------------------------\\
+        // GET api/<StoreController>/5 Get value or something abse don id e.g 5    
         [HttpGet("{id}")]
         public async Task<ActionResult<Store>> GetAsync(int id)
         {
@@ -52,7 +53,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        //---------------------------------------------------------------------------------------------------\\
+        //------------------------------------------------<> AddStore <>-------------------------------------------------------\\
         // POST api/<StoreController> Upload
         [HttpPost]
         public ActionResult<Store> Post([FromBody] Store storeToAdd)
@@ -70,19 +71,39 @@ namespace WebAPI.Controllers
             }
         }
 
-        //---------------------------------------------------------------------------------------------------\\
+        //-------------------------------------------------<> ChangeStoreInfo <>--------------------------------------------------\\
         // PUT api/<StoreController>/5  add to something
+        //[Authorize]
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        //public void Put(int id, [FromBody] int value)
+        public ActionResult Put([FromBody] Store changeStoreInfo)
         {
-                
+            try
+            {
+                _bl.ChangeStoreInfo(changeStoreInfo);
+                //Created 201
+                return Created("Product updated", changeStoreInfo);
+            }
+            catch (Exception ex)
+            {
+                //Dupelicate is 409, but I can't test that yet, don't know how
+                return Conflict(ex.Message);
+            }
+
         }
 
-        //---------------------------------------------------------------------------------------------------\\
-        // DELETE api/<StoreController>/5  delete the thing
+        //-------------------------------------------------<> RemoveStore <>--------------------------------------------------\\
+        // DELETE api/<StoreController>/5  delete the thing, Cannot delete store until FKs are clear first
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async void Delete(int id)
         {
+            Store selectStore = await _bl.GetStoreByIdAsync(id);
+            if (selectStore.StoreID == null)
+            {
+                //return NoContent();
+            }
+            _bl.RemoveStore(id);
+            //return Ok();
         }
     }
 }
