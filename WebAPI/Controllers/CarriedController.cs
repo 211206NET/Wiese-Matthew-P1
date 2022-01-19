@@ -29,7 +29,7 @@ namespace WebAPI.Controllers
         public List<ProdDetails> Get()//Get All
         {
             List<ProdDetails> allCarried;// = _bl.GetAllStores();
-            if (!_memoryCache.TryGetValue("ProdDetails", out allCarried))//null ref
+            if (!_memoryCache.TryGetValue("ProdDetails", out allCarried))//null ref sl,jkhfnsjkhfgjk
             {
                 allCarried = _bl.GetAllCarried();
                 _memoryCache.Set("prodDetails", allCarried, new TimeSpan(0, 0, 30));
