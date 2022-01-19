@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using System.Data;
+using System.ComponentModel.DataAnnotations;
 
 namespace Models;
 
@@ -23,6 +24,8 @@ public class Store
     }
     
     public int StoreID { get; set; }//Each different store has an ID [PK]
+    [Required]
+    [RegularExpression("^[a-zA-Z0-9 !?']+$", ErrorMessage = "Cannot make store name like that")]
     public string? StoreName { get; set; }
     public string? City { get; set; }
     public string? State { get; set; }

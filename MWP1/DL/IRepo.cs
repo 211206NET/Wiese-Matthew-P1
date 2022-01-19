@@ -19,24 +19,27 @@ public interface IRepo
     void AddStore(Store StoreToAdd);
     void ChangeStoreInfo(Store changeStoreInfo);//(int storeIndex, string name, string city, string state);
     void RemoveStore(int StoreToRemove);
+    Task<Store> GetStoreByIdAsync(int StoreId);
+
+    //Customers
+    List<Customers> GetAllCustomers();
+    Task<Customers> GetCustomerByIdAsync(int customerId);
+    void AddCustomer(Customers addCust);//int custNum, string userName, string pass);
 
     //Inventory
     List<Inventory> GetAllInventory();
     void AddInventory(Inventory invToAdd);
-    void AddItem(ProdDetails invToAdd); //int invIndex, 
     void ChangeInventory(int invIndex, int qtyToChange);//int invIndex, int apn, int itemQty);    
     void RemoveInventory(int invId);
-    void RemoveOrphanInventory(int storePK);
-    void RemoveItem(int apnToRemove);
-
-    //Customers
-    List<Customers> GetAllCustomers();
-    void AddCustomer(Customers addCust);//int custNum, string userName, string pass);
+    //void RemoveOrphanInventory(int storePK);
 
     //Carried Items
     List<ProdDetails> GetAllCarried();
+    Task<ProdDetails> GetCarriedByIdAsync(int carriedId);
     void AddCarried(ProdDetails itemNew);//(int itemNum, string itemName, int itemType, string itemDesc, Decimal itemCost, Double itemWeight);
     void ChangeCarried(ProdDetails changeCarriedItem);//int itemNum, string itemName, int itemType, string itemDesc, Decimal itemCost, Double itemWeight);
+    //void AddItem(ProdDetails invToAdd); //int invIndex, 
+    void RemoveItem(int apnToRemove);
 
     //Line Items
     List<LineItems> GetAllLineItem();

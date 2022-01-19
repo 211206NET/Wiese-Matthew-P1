@@ -17,8 +17,11 @@ public class DBRepo : IRepo
         //Console.WriteLine(_connectionString);
         //???
     }
-    
-    //_____________________________ <> Store <> _____________________________\\
+
+    //------------------------------------------------------------------------------\\
+    //<>                                Stores                                    <>\\
+    //------------------------------------------------------------------------------\\
+
     /// <summary>
     /// Returns a list of all stores
     /// </summary>
@@ -43,6 +46,32 @@ public class DBRepo : IRepo
             }
         }
         return allStoreSQL;
+    }
+
+    //Return Store by ID
+    public async Task<Store> GetStoreByIdAsync(int storeId) //Added async and Task<> and Async to name
+    {
+        string query = "SELECT * FROM Store WHERE StoreId = @storoId";
+        using SqlConnection connection = new SqlConnection(_connectionString);
+        connection.Open();
+        using SqlCommand cmd = new SqlCommand(query, connection);
+        SqlParameter param = new SqlParameter("@storoId", storeId);
+        cmd.Parameters.Add(param);
+
+        using SqlDataReader reader = cmd.ExecuteReader();
+        Store store = new Store();
+        //if(reader.Read()) 
+        if (await reader.ReadAsync())
+        {
+            store.StoreID = reader.GetInt32(0);
+            store.StoreName = reader.GetString(1);
+            store.State = reader.GetString(2);
+            store.City = reader.GetString(3);
+            store.SalesTax = reader.GetDecimal(4);
+        }
+
+        connection.Close();
+        return store;
     }
 
     /// <summary>
@@ -84,7 +113,7 @@ public class DBRepo : IRepo
         using(SqlConnection connection = new SqlConnection(_connectionString))
         {
             connection.Open();
-            string sqlCmd = "UPDATE Store SET StoreName = @p1, City = @p2, State = @p3, SalesTax = @p4 WHERE StoreId = @p0";
+            string sqlCmd = $"UPDATE Store SET StoreName = @p1, City = @p2, State = @p3, SalesTax = @p4 WHERE StoreId = @p0";
             using(SqlCommand cmd = new SqlCommand(sqlCmd, connection))
             {
                 cmd.Parameters.AddWithValue("@p0", changeStoreInfo.StoreID);
@@ -105,8 +134,8 @@ public class DBRepo : IRepo
     /// Allows manager to remove a store, all inventory of store, and all orders etc. of that store
     /// The removal of associated inventory, orders, and line items are each handeled with their own methods
     /// </summary>
-    /// <param name="StoreToRemove"></param>
-    public void RemoveStore(int StoreToRemove)
+    /// <param name="storeToRemove"></param>
+    public void RemoveStore(int storeToRemove)
     {
         //throw new NotImplementedException();
         using(SqlConnection connection = new SqlConnection(_connectionString))
@@ -115,17 +144,129 @@ public class DBRepo : IRepo
             string sqlCmd = "DELETE FROM Store WHERE StoreId = @p0";
             using(SqlCommand cmd = new SqlCommand(sqlCmd, connection))
             {
-                cmd.Parameters.AddWithValue("@p0", StoreToRemove);
+                cmd.Parameters.AddWithValue("@p0", storeToRemove);
 
                 int changed = cmd.ExecuteNonQuery();
-                Console.WriteLine($"RemoveStore: changed: {changed}, invIndex: {StoreToRemove}");
+                Console.WriteLine($"RemoveStore: changed: {changed}, invIndex: {storeToRemove}");
+            }
+            connection.Close();
+        }
+    }
+
+    public bool IsDuplicate(Store Store)
+    {
+        string searchQuery = $"SELECT * FROM Store WHERE Name='{Store.StoreName}' AND City='{Store.City}' AND State='{Store.State}'";
+
+        using SqlConnection connection = new SqlConnection(_connectionString);
+        using SqlCommand cmd = new SqlCommand(searchQuery, connection);
+
+        connection.Open();
+
+        using SqlDataReader reader = cmd.ExecuteReader();
+
+        if (reader.HasRows)
+        {
+            //Query returned something, there exists a record that shares the same name, city, and state to the Store the user is trying to create 
+            return true;
+        }
+        //no record was returned. No duplicate record in the db
+        return false;
+    }
+
+
+    //------------------------------------------------------------------------------\\
+    //<>                               Customers                                  <>\\
+    //------------------------------------------------------------------------------\\
+
+    /// <summary>
+    /// Returns a list from database of all customers
+    /// </summary>
+    /// <returns>allcusSQL</returns>
+    public List<Customers> GetAllCustomers()
+    {
+        //throw new NotImplementedException();
+        //string checkForUsername = "SELECT userName FROM Customer WHERE userName=' {s.userName}"; //ref
+        List<Customers> allcusSQL = new List<Customers>();
+        using SqlConnection connection = new SqlConnection(_connectionString);
+        string cusToSelect = "SELECT * FROM Customers";
+        DataSet CSSet = new DataSet();
+
+        using SqlDataAdapter cusAdapter = new SqlDataAdapter(cusToSelect, connection);
+        cusAdapter.Fill(CSSet, "Customers");
+        DataTable? cusTable = CSSet.Tables["Customers"];
+
+        if (cusTable != null)
+        {
+            foreach (DataRow row in cusTable.Rows)
+            {
+                Customers custo = new Customers(row);
+                allcusSQL.Add(custo);
+            }
+        }
+        //Console.WriteLine("Finished Get Customers");    
+        return allcusSQL;
+    }
+
+
+    public async Task<Customers> GetCustomerByIdAsync(int customerId)
+    {
+        string query = "SELECT * FROM Customers WHERE CustNumb = @custoId";
+        using SqlConnection connection = new SqlConnection(_connectionString);
+        connection.Open();
+        using SqlCommand cmd = new SqlCommand(query, connection);
+        SqlParameter param = new SqlParameter("@custoId", customerId);
+        cmd.Parameters.Add(param);
+
+        using SqlDataReader reader = cmd.ExecuteReader();
+        Customers customer = new Customers();
+        if (await reader.ReadAsync())
+        {
+            customer.CustNumb = reader.GetInt32(0);
+            customer.UserName = reader.GetString(1);
+            customer.Pass = reader.GetString(2);
+            customer.Employee = reader.GetBoolean(3);
+        }
+
+        connection.Close();
+        return customer;
+    }
+
+    /// <summary>
+    /// Adds a customer to the database
+    /// </summary>
+    /// <param name="addCust"></param>
+    public void AddCustomer(Customers addCust)//int custNum, string userName, string pass
+    {
+        //throw new NotImplementedException();
+        using (SqlConnection connection = new SqlConnection(_connectionString))
+        {
+            connection.Open();
+            string sqlCmd = "INSERT INTO Customers (UserName, Pass, Employee) VALUES (@p2, @p3, @p4)";
+            //string sqlCmd = "SET IDENTITY_INSERT [dbo].[Customers] ON INSERT INTO Customers (CustNumb, UserName, Pass, Employee) VALUES (@p1, @p2, @p3, @p4) SET IDENTITY_INSERT [dbo].[Customers] OFF";
+
+            using (SqlCommand cmd = new SqlCommand(sqlCmd, connection))
+            {
+                //SqlParameter param = (new SqlParameter("@p1", addCust.CustNumb));
+                //cmd.Parameters.Add(param);
+                SqlParameter param = (new SqlParameter("@p2", addCust.UserName));
+                cmd.Parameters.Add(param);
+                param = (new SqlParameter("@p3", addCust.Pass));
+                cmd.Parameters.Add(param);
+                param = (new SqlParameter("@p4", addCust.Employee));
+                cmd.Parameters.Add(param);
+                //...
+
+                cmd.ExecuteNonQuery();
             }
             connection.Close();
         }
     }
 
 
-    //_____________________________ <> Inventory <> _____________________________\\
+    //------------------------------------------------------------------------------\\
+    //<>                               Inventory                                  <>\\
+    //------------------------------------------------------------------------------\\
+
     /// <summary>
     /// Returns a list od all inventory for all stores from the database
     /// </summary>
@@ -163,13 +304,11 @@ public class DBRepo : IRepo
         using(SqlConnection connection = new SqlConnection(_connectionString))
         {
             connection.Open();
-            string sqlCmd = "SET IDENTITY_INSERT [dbo].[Inventory] ON  INSERT INTO Inventory (Id, Store, Item, Qty) VALUES (@p1, @p2, @p3, @p4) SET IDENTITY_INSERT [dbo].[Inventory] OFF";
+            string sqlCmd = "INSERT INTO Inventory (Store, Item, Qty) VALUES (@p2, @p3, @p4)";
 
             using(SqlCommand cmd = new SqlCommand(sqlCmd, connection))
             {
-                SqlParameter param = (new SqlParameter("@p1", invToAdd.Id));
-                cmd.Parameters.Add(param);
-                param = (new SqlParameter("@p2", invToAdd.Store));
+                SqlParameter param = (new SqlParameter("@p2", invToAdd.Store));
                 cmd.Parameters.Add(param);
                 param = (new SqlParameter("@p3", invToAdd.Item));
                 cmd.Parameters.Add(param);
@@ -178,62 +317,6 @@ public class DBRepo : IRepo
                 //...
 
                 cmd.ExecuteNonQuery();
-            }
-            connection.Close();
-        }
-    }
-
-    /// <summary>
-    /// Add item to list of carried items
-    /// </summary>
-    /// <param name="invToAdd"></param>
-    public void AddItem(ProdDetails invToAdd)//maybe first parameter becomes storeID  //int invIndex, 
-    {
-        //throw new NotImplementedException();  
-        using(SqlConnection connection = new SqlConnection(_connectionString))
-        {
-            connection.Open();
-            string sqlCmd = "INSERT INTO Carried (APN, Name, ItemType, Weight, Cost, Descript) VALUES (@p1, @p2, @p4, @5, @6, @7)";
-
-            using(SqlCommand cmd = new SqlCommand(sqlCmd, connection))
-            {
-                SqlParameter param = (new SqlParameter("@p1", invToAdd.APN));
-                cmd.Parameters.Add(param);
-                param = (new SqlParameter("@p2", invToAdd.Name));
-                cmd.Parameters.Add(param);
-                param = (new SqlParameter("@p4", invToAdd.ItemType));
-                cmd.Parameters.Add(param);
-                param = (new SqlParameter("@p5", invToAdd.Weight));
-                cmd.Parameters.Add(param);
-                param = (new SqlParameter("@p6", invToAdd.Cost));
-                cmd.Parameters.Add(param);
-                param = (new SqlParameter("@p7", invToAdd.Descr));
-                cmd.Parameters.Add(param);
-                //...
-
-                cmd.ExecuteNonQuery();
-            }
-            connection.Close();
-        }
-    }   
-
-    /// <summary>
-    /// Remove item in list of carried items
-    /// </summary>
-    /// <param name="apnToRemove"></param>
-    public void RemoveItem(int apnToRemove)
-    {
-        //throw new NotImplementedException();
-        using(SqlConnection connection = new SqlConnection(_connectionString))
-        {
-            connection.Open();
-            string sqlCmd = "DELETE FROM Carried WHERE APN = @p0";
-            using(SqlCommand cmd = new SqlCommand(sqlCmd, connection))
-            {
-                cmd.Parameters.AddWithValue("@p0", apnToRemove);
-
-                int changed = cmd.ExecuteNonQuery();
-                Console.WriteLine($"Removed item: changed: {changed}, invIndex: {apnToRemove}");
             }
             connection.Close();
         }
@@ -289,91 +372,35 @@ public class DBRepo : IRepo
             connection.Close();
         }
     }
-
+    //OBSOLETE, Old UI depended on differnt value sot dele inventory, it should go by inventory id only best practice
     /// <summary>
     /// The job of this method is to remove an entire row from inventory when store is deleted
     /// </summary>
     /// <param name="storePK"></param>
-    public void RemoveOrphanInventory(int storePK)
-    {
-        //throw new NotImplementedException();
-        using(SqlConnection connection = new SqlConnection(_connectionString))
-        {
-            connection.Open();
-            string sqlCmd = "DELETE FROM Inventory WHERE Store = @p0"; //Where store is wrong?
-            using(SqlCommand cmd = new SqlCommand(sqlCmd, connection))
-            {
-                //SqlParameter param = (new SqlParameter("@p1", qtyToChange));
-                cmd.Parameters.AddWithValue("@p0", storePK);
-                //...
+    //public void RemoveOrphanInventory(int storePK)
+    //{
+    //    //throw new NotImplementedException();
+    //    using(SqlConnection connection = new SqlConnection(_connectionString))
+    //    {
+    //        connection.Open();
+    //        string sqlCmd = "DELETE FROM Inventory WHERE Store = @p0"; //Where store is wrong?
+    //        using(SqlCommand cmd = new SqlCommand(sqlCmd, connection))
+    //        {
+    //            //SqlParameter param = (new SqlParameter("@p1", qtyToChange));
+    //            cmd.Parameters.AddWithValue("@p0", storePK);
+    //            //...
 
-                int changed = cmd.ExecuteNonQuery();
-                Console.WriteLine($"Remove Orphan Inventory: changed: {changed}, storePK: {storePK}");
-            }
-            connection.Close();
-        }
-    }
+    //            int changed = cmd.ExecuteNonQuery();
+    //            Console.WriteLine($"Remove Orphan Inventory: changed: {changed}, storePK: {storePK}");
+    //        }
+    //        connection.Close();
+    //    }
+    //}
 
-    //_____________________________ <> Customers <> _____________________________\\
-    /// <summary>
-    /// Returns a list from database of all customers
-    /// </summary>
-    /// <returns>allcusSQL</returns>
-    public List<Customers> GetAllCustomers()
-    {
-        //throw new NotImplementedException();
-        //string checkForUsername = "SELECT userName FROM Customer WHERE userName=' {s.userName}"; //ref
-        List<Customers> allcusSQL = new List<Customers>();
-        using SqlConnection connection = new SqlConnection(_connectionString);
-        string cusToSelect = "SELECT * FROM Customers";
-        DataSet CSSet = new DataSet();
-        using SqlDataAdapter cusAdapter = new SqlDataAdapter(cusToSelect, connection);    
-        cusAdapter.Fill(CSSet, "Customers");
-        DataTable? cusTable = CSSet.Tables["Customers"];
-            
-        if(cusTable != null)
-        { 
-            foreach(DataRow row in cusTable.Rows)
-            {
-                Customers custo = new Customers(row);
-                allcusSQL.Add(custo);
-            }
-        }
-        //Console.WriteLine("Finished Get Customers");    
-        return allcusSQL;
-    }
-    
-    /// <summary>
-    /// Adds a customer to the database
-    /// </summary>
-    /// <param name="addCust"></param>
-    public void AddCustomer(Customers addCust)//int custNum, string userName, string pass
-    {
-        //throw new NotImplementedException();
-        using(SqlConnection connection = new SqlConnection(_connectionString))
-        {
-            connection.Open();
-            string sqlCmd = "SET IDENTITY_INSERT [dbo].[Customers] ON INSERT INTO Customers (CustNumb, UserName, Pass, Employee) VALUES (@p1, @p2, @p3, @p4) SET IDENTITY_INSERT [dbo].[Customers] OFF";
+    //------------------------------------------------------------------------------\\
+    //<>                              Carried Items                               <>\\
+    //------------------------------------------------------------------------------\\
 
-            using(SqlCommand cmd = new SqlCommand(sqlCmd, connection))
-            {
-                SqlParameter param = (new SqlParameter("@p1", addCust.CustNumb));
-                cmd.Parameters.Add(param);
-                param = (new SqlParameter("@p2", addCust.UserName));
-                cmd.Parameters.Add(param);
-                param = (new SqlParameter("@p3", addCust.Pass));
-                cmd.Parameters.Add(param);
-                param = (new SqlParameter("@p4", addCust.Employee));
-                cmd.Parameters.Add(param);
-                //...
-
-                cmd.ExecuteNonQuery();
-            }
-            connection.Close();
-        }
-    }
-
-    //_____________________________ <> Carried Items <> _____________________________\\
     /// <summary>
     /// Returns a list of all carried items from the database
     /// </summary>
@@ -400,6 +427,33 @@ public class DBRepo : IRepo
         return allcarSQL;
     }
 
+    //Return Carried by ID
+    public async Task<ProdDetails> GetCarriedByIdAsync(int carriedId) //Added async and Task<> and Async to name
+    {
+        string query = "SELECT * FROM Carried WHERE APN = @p0";
+        using SqlConnection connection = new SqlConnection(_connectionString);
+        connection.Open();
+        using SqlCommand cmd = new SqlCommand(query, connection);
+        SqlParameter param = new SqlParameter("@p0", carriedId);
+        cmd.Parameters.Add(param);
+
+        using SqlDataReader reader = cmd.ExecuteReader();
+        ProdDetails carried = new ProdDetails();
+        //if(reader.Read()) 
+        if (await reader.ReadAsync())
+        {
+            carried.APN = reader.GetInt32(0);
+            carried.Name = reader.GetString(1);
+            carried.ItemType = reader.GetInt32(2);
+            carried.Weight = reader.GetDouble(3);
+            carried.Cost = reader.GetDecimal(4);
+            carried.Descr = reader.GetString(5);
+        }
+
+        connection.Close();
+        return carried;
+    }
+
     /// <summary>
     /// Adds a new item to list of current items in database
     /// </summary>
@@ -409,13 +463,11 @@ public class DBRepo : IRepo
         using(SqlConnection connection = new SqlConnection(_connectionString))
         {
             connection.Open();
-            string sqlCmd = "SET IDENTITY_INSERT [dbo].[Carried] ON INSERT INTO Carried (APN, Name, ItemType, Weight, Cost, Descript) VALUES (@p1, @p2, @p4, @p5, @p6, @p7) SET IDENTITY_INSERT [dbo].[Carried] OFF";
+            string sqlCmd = "INSERT INTO Carried (Name, ItemType, Weight, Cost, Descript) VALUES (@p2, @p4, @p5, @p6, @p7)";
 
             using(SqlCommand cmd = new SqlCommand(sqlCmd, connection))
             {
-                SqlParameter param = (new SqlParameter("@p1", itemNew.APN));
-                cmd.Parameters.Add(param);
-                param = (new SqlParameter("@p2", itemNew.Name));
+                SqlParameter param = (new SqlParameter("@p2", itemNew.Name));
                 cmd.Parameters.Add(param);
                 param = (new SqlParameter("@p4", itemNew.ItemType));
                 cmd.Parameters.Add(param);
@@ -462,7 +514,68 @@ public class DBRepo : IRepo
         }
     }
 
-    //_____________________________ <> Line Items <> _____________________________\\
+
+    //I already have a method AddCarried, Why does this exists?
+    /// <summary>
+    /// Add item to list of carried items
+    /// </summary>
+    /// <param name="invToAdd"></param>
+    //public void AddItem(ProdDetails invToAdd)//maybe first parameter becomes storeID  //int invIndex, 
+    //{
+    //    //throw new NotImplementedException();  
+    //    using (SqlConnection connection = new SqlConnection(_connectionString))
+    //    {
+    //        connection.Open();
+    //        string sqlCmd = "INSERT INTO Carried (APN, Name, ItemType, Weight, Cost, Descript) VALUES (@p1, @p2, @p4, @5, @6, @7)";
+
+    //        using (SqlCommand cmd = new SqlCommand(sqlCmd, connection))
+    //        {
+    //            SqlParameter param = (new SqlParameter("@p1", invToAdd.APN));
+    //            cmd.Parameters.Add(param);
+    //            param = (new SqlParameter("@p2", invToAdd.Name));
+    //            cmd.Parameters.Add(param);
+    //            param = (new SqlParameter("@p4", invToAdd.ItemType));
+    //            cmd.Parameters.Add(param);
+    //            param = (new SqlParameter("@p5", invToAdd.Weight));
+    //            cmd.Parameters.Add(param);
+    //            param = (new SqlParameter("@p6", invToAdd.Cost));
+    //            cmd.Parameters.Add(param);
+    //            param = (new SqlParameter("@p7", invToAdd.Descr));
+    //            cmd.Parameters.Add(param);
+    //            //...
+
+    //            cmd.ExecuteNonQuery();
+    //        }
+    //        connection.Close();
+    //    }
+    //}
+
+    /// <summary>
+    /// Remove item in list of carried items
+    /// </summary>
+    /// <param name="apnToRemove"></param>
+    public void RemoveItem(int apnToRemove)
+    {
+        //throw new NotImplementedException();
+        using (SqlConnection connection = new SqlConnection(_connectionString))
+        {
+            connection.Open();
+            string sqlCmd = "DELETE FROM Carried WHERE APN = @p0";
+            using (SqlCommand cmd = new SqlCommand(sqlCmd, connection))
+            {
+                cmd.Parameters.AddWithValue("@p0", apnToRemove);
+
+                int changed = cmd.ExecuteNonQuery();
+                Console.WriteLine($"Removed item: changed: {changed}, invIndex: {apnToRemove}");
+            }
+            connection.Close();
+        }
+    }
+
+    //------------------------------------------------------------------------------\\
+    //<>                              Line Items                                  <>\\
+    //------------------------------------------------------------------------------\\
+
     /// <summary>
     /// Returns a list of all line items from the database
     /// </summary>
@@ -590,8 +703,12 @@ public class DBRepo : IRepo
             connection.Close();
         }
     }
-    
-    //_____________________________ <> Orders <> _____________________________\\
+
+
+    //------------------------------------------------------------------------------\\
+    //<>                                Orders                                    <>\\
+    //------------------------------------------------------------------------------\\
+
     /// <summary>
     /// Returns a list of all orders from the database
     /// </summary>
@@ -636,14 +753,12 @@ public class DBRepo : IRepo
         using(SqlConnection connection = new SqlConnection(_connectionString))
         {
             connection.Open();
-            string sqlCmd = "SET IDENTITY_INSERT [dbo].[Orders] ON INSERT INTO Orders (OrderId, CustomerId, StoreId, OrderDate, Total, TotalCost, OrderCompleted) VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7) SET IDENTITY_INSERT [dbo].[Orders] OFF"; //OrderId, @p1,
+            string sqlCmd = "INSERT INTO Orders (CustomerId, StoreId, OrderDate, Total, TotalCost, OrderCompleted) VALUES (@p2, @p3, @p4, @p5, @p6, @p7)"; //OrderId, @p1,
 
             using(SqlCommand cmd = new SqlCommand(sqlCmd, connection))
             {
                 
-                SqlParameter param = (new SqlParameter("@p1", orderItems.OrderId));
-                cmd.Parameters.Add(param);
-                param = (new SqlParameter("@p2", orderItems.CustomerId));
+                SqlParameter param = (new SqlParameter("@p2", orderItems.CustomerId));
                 cmd.Parameters.Add(param);
                 param = (new SqlParameter("@p3", orderItems.StoreId));
                 cmd.Parameters.Add(param);
