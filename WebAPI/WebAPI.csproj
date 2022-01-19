@@ -12,9 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Wiese-Matthew-P0\BL\BL.csproj" />
-    <ProjectReference Include="..\..\Wiese-Matthew-P0\DL\DL.csproj" />
-    <ProjectReference Include="..\..\Wiese-Matthew-P0\Models\Models.csproj" />
+    <ProjectReference Include="..\..\Wiese-Matthew-P1\BL\BL.csproj" />
+    <ProjectReference Include="..\..\Wiese-Matthew-P1\DL\DL.csproj" />
+    <ProjectReference Include="..\..\Wiese-Matthew-P1\Models\Models.csproj" />
   </ItemGroup>
 
 </Project>
