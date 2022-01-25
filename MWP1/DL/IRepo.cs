@@ -17,40 +17,39 @@ public interface IRepo
     //Store
     List<Store> GetAllStores();
     void AddStore(Store StoreToAdd);
-    void ChangeStoreInfo(Store changeStoreInfo);//(int storeIndex, string name, string city, string state);
-    void RemoveStore(int StoreToRemove);
+    void ChangeStoreInfo(Store changeStoreInfo);
     Task<Store> GetStoreByIdAsync(int StoreId);
 
     //Customers
     List<Customers> GetAllCustomers();
     Task<Customers> GetCustomerByIdAsync(int customerId);
     void AddCustomer(Customers addCust);//int custNum, string userName, string pass);
+    void ChangeUserInfo(Customers changeCustomerInfo);
 
     //Inventory
     List<Inventory> GetAllInventory();
+    Task<Inventory> GetAllInventoryByStoreAsync(int storeId);
     void AddInventory(Inventory invToAdd);
-    void ChangeInventory(int invIndex, int qtyToChange);//int invIndex, int apn, int itemQty);    
-    void RemoveInventory(int invId);
-    //void RemoveOrphanInventory(int storePK);
+    void ChangeInventory(int invIndex, int qtyToChange);
 
     //Carried Items
     List<ProdDetails> GetAllCarried();
     Task<ProdDetails> GetCarriedByIdAsync(int carriedId);
-    void AddCarried(ProdDetails itemNew);//(int itemNum, string itemName, int itemType, string itemDesc, Decimal itemCost, Double itemWeight);
-    void ChangeCarried(ProdDetails changeCarriedItem);//int itemNum, string itemName, int itemType, string itemDesc, Decimal itemCost, Double itemWeight);
-    //void AddItem(ProdDetails invToAdd); //int invIndex, 
-    void RemoveItem(int apnToRemove);
+    void AddCarried(ProdDetails itemNew);
+    void ChangeCarried(ProdDetails changeCarriedItem);
 
     //Line Items
     List<LineItems> GetAllLineItem();
-    void AddLineItem(LineItems newLI);//(int apn, string name, int qty, Decimal costPerItem, Decimal salesTax);
-    void RemoveLineItem(int lineItemIndexToRemove);
-    void RemoveOrphanLineItem(int storePK);
+    Task<LineItems> GetLineitemsByIdAsync(int lineitemId);
+    void AddLineItem(LineItems newLI);
     void FinalizeLineItem(LineItems finalLineItem);
 
     //Orders
     List<Orders> GetAllOrders();
+    Task<Orders> GetOrderByIdAsync(int orderId);
     void AddOrder(Orders orderItems);
-    void FinalizeOrder(int orderIndex, Orders finalDetails);
-    void DeleteOrders(int ordersToDelete);
+    void FinalizeOrder(Orders finalDetails);
+
+    //Omni
+    void OmniDelete(int whatTable, int idToDelete);
 }

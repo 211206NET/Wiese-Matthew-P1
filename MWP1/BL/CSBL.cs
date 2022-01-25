@@ -29,10 +29,6 @@ public class CSBL : IBL
     {
        _dl.ChangeStoreInfo(changeStoreInfo);
     }
-    public void RemoveStore(int storeToRemove)
-    {
-        _dl.RemoveStore(storeToRemove);
-    }
     public async Task<Store> GetStoreByIdAsync(int storeId)
     {
         return await _dl.GetStoreByIdAsync(storeId);
@@ -55,6 +51,11 @@ public class CSBL : IBL
         _dl.AddCustomer(addCust);//custNum, userName, pass, employee);
     }
 
+    public void ChangeUserInfo(Customers changeCustomerInfo)
+    {
+        _dl.ChangeUserInfo(changeCustomerInfo);
+    }
+
     //------------------------------------------------------------------------------\\
     //<>                               Inventory                                  <>\\
     //------------------------------------------------------------------------------\\
@@ -63,6 +64,12 @@ public class CSBL : IBL
     {
         return _dl.GetAllInventory();
     }
+
+    public async Task<Inventory> GetAllInventoryByStoreAsync(int storeId)
+    {
+        return await _dl.GetAllInventoryByStoreAsync(storeId);
+    }
+
     public void AddInventory(Inventory invToAdd)
     {
         _dl.AddInventory(invToAdd);
@@ -71,14 +78,6 @@ public class CSBL : IBL
     {
         _dl.ChangeInventory(invIndex, qtyToChange);
     }
-    public void RemoveInventory(int invId)
-    {
-        _dl.RemoveInventory(invId);
-    }
-    //public void RemoveOrphanInventory(int storePK)
-    //{
-    //    _dl.RemoveOrphanInventory(storePK);
-    //}
 
     //------------------------------------------------------------------------------\\
     //<>                              Carried Items                               <>\\
@@ -104,14 +103,6 @@ public class CSBL : IBL
     {
         _dl.ChangeCarried(changeCarriedItem);//itemNum, itemName, itemType, itemDesc, itemCost, itemWeight);
     }
-    //public void AddItem(ProdDetails invToAdd) //int invIndex, 
-    //{
-    //    _dl.AddItem(invToAdd);
-    //}
-    public void RemoveItem(int apnToRemove)
-    {
-        _dl.RemoveItem(apnToRemove);
-    }
 
     //------------------------------------------------------------------------------\\
     //<>                              Line Items                                  <>\\
@@ -122,19 +113,14 @@ public class CSBL : IBL
         return _dl.GetAllLineItem();
     }
 
+    public async Task<LineItems> GetLineitemsByIdAsync(int lineitemId)
+    {
+        return await _dl.GetLineitemsByIdAsync(lineitemId);
+    }
+
     public void AddLineItem(LineItems newLI)//(int apn, string name, int qty, Decimal costPerItem, Decimal salesTax)
     {
         _dl.AddLineItem(newLI);//(apn, name, qty, costPerItem, salesTax);
-    }
-
-    public void RemoveLineItem(int lineItemIndexToRemove)
-    {
-        _dl.RemoveLineItem(lineItemIndexToRemove);
-    }   
-
-    public void RemoveOrphanLineItem(int storePK)
-    {
-        _dl.RemoveOrphanLineItem(storePK);
     }
 
     public void FinalizeLineItem(LineItems finalLineItem)
@@ -151,22 +137,26 @@ public class CSBL : IBL
         return _dl.GetAllOrders();
     }
 
+    public async Task<Orders> GetOrderByIdAsync(int orderId)
+    {
+        return await _dl.GetOrderByIdAsync(orderId);
+    }
+
     //Add a new order to order history
     public void AddOrder(Orders orderItems)
     {
         _dl.AddOrder(orderItems);
     }
 
-    public void FinalizeOrder(int orderIndex, Orders finalDetails)
+    public void FinalizeOrder(Orders finalDetails)
     {
-        _dl.FinalizeOrder(orderIndex, finalDetails);
+        _dl.FinalizeOrder(finalDetails);
     }
 
-    //In the event a store is closed, all it's records are deleted
-    public void DeleteOrders(int ordersToDelete)
+    //Omni
+    public void OmniDelete(int whatTable, int idToDelete)
     {
-        _dl.DeleteOrders(ordersToDelete);
+        _dl.OmniDelete(whatTable, idToDelete);
     }
-   
 
 }

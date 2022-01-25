@@ -3,6 +3,15 @@ using System.Data;
 
 namespace DL;
 
+
+/*
+SELECT COUNT(*)
+  FROM Store.COLUMNS
+ WHERE table_catalog = 'database_name'-- the database
+   AND table_name = 'Store'
+*/
+
+
 /// <summary>
 /// One massive repo that I wanted to split into smaller ones but ran of time.
 /// This handles all my communication to the SQL server.
@@ -79,8 +88,9 @@ public class DBRepo : IRepo
     /// </summary>
     /// <param name="storeToAdd"></param>
     public void AddStore(Store storeToAdd)
-    {    
-        using(SqlConnection connection = new SqlConnection(_connectionString))
+    {
+        if (IsDuplicate(storeToAdd) == true) { return; }
+        using (SqlConnection connection = new SqlConnection(_connectionString))
         {
             connection.Open();
             string sqlCmd = "INSERT INTO Store (StoreName, City, State, SalesTax) VALUES (@p1, @p2, @p3, @p4)";
@@ -131,31 +141,13 @@ public class DBRepo : IRepo
     }
 
     /// <summary>
-    /// Allows manager to remove a store, all inventory of store, and all orders etc. of that store
-    /// The removal of associated inventory, orders, and line items are each handeled with their own methods
+    /// Check if restaurant is a duplicate
     /// </summary>
-    /// <param name="storeToRemove"></param>
-    public void RemoveStore(int storeToRemove)
+    /// <param name="Store"></param>
+    /// <returns></returns>
+    public bool IsDuplicate(Store store)
     {
-        //throw new NotImplementedException();
-        using(SqlConnection connection = new SqlConnection(_connectionString))
-        {
-            connection.Open();
-            string sqlCmd = "DELETE FROM Store WHERE StoreId = @p0";
-            using(SqlCommand cmd = new SqlCommand(sqlCmd, connection))
-            {
-                cmd.Parameters.AddWithValue("@p0", storeToRemove);
-
-                int changed = cmd.ExecuteNonQuery();
-                Console.WriteLine($"RemoveStore: changed: {changed}, invIndex: {storeToRemove}");
-            }
-            connection.Close();
-        }
-    }
-
-    public bool IsDuplicate(Store Store)
-    {
-        string searchQuery = $"SELECT * FROM Store WHERE Name='{Store.StoreName}' AND City='{Store.City}' AND State='{Store.State}'";
+        string searchQuery = $"SELECT * FROM Store WHERE StoreName='{store.StoreName}' AND City='{store.City}' AND State='{store.State}'";
 
         using SqlConnection connection = new SqlConnection(_connectionString);
         using SqlCommand cmd = new SqlCommand(searchQuery, connection);
@@ -172,7 +164,6 @@ public class DBRepo : IRepo
         //no record was returned. No duplicate record in the db
         return false;
     }
-
 
     //------------------------------------------------------------------------------\\
     //<>                               Customers                                  <>\\
@@ -263,6 +254,28 @@ public class DBRepo : IRepo
     }
 
 
+    public void ChangeUserInfo(Customers changeCustomerInfo)
+    {
+        //throw new NotImplementedException();
+        using (SqlConnection connection = new SqlConnection(_connectionString))
+        {
+            connection.Open();
+            string sqlCmd = "UPDATE Customers SET UserName = @p0, Pass = @p1, Employee = @p3 WHERE CustNumb = @p2";
+            using (SqlCommand cmd = new SqlCommand(sqlCmd, connection))
+            {
+                cmd.Parameters.AddWithValue("@p0", changeCustomerInfo.UserName);
+                cmd.Parameters.AddWithValue("@p1", changeCustomerInfo.Pass);
+                cmd.Parameters.AddWithValue("@p2", changeCustomerInfo.CustNumb);
+                cmd.Parameters.AddWithValue("@p3", changeCustomerInfo.Employee);
+                //...
+
+                int changed = cmd.ExecuteNonQuery();
+            }
+            connection.Close();
+        }
+    }
+
+
     //------------------------------------------------------------------------------\\
     //<>                               Inventory                                  <>\\
     //------------------------------------------------------------------------------\\
@@ -292,6 +305,30 @@ public class DBRepo : IRepo
             }
         }
         return allInvSQL;
+    }
+
+    //Get Inventory by store
+    public async Task<Inventory> GetAllInventoryByStoreAsync(int storeId)
+    {
+        string query = "SELECT * FROM Inventory WHERE Store = @p0";
+        using SqlConnection connection = new SqlConnection(_connectionString);
+        connection.Open();
+        using SqlCommand cmd = new SqlCommand(query, connection);
+        SqlParameter param = new SqlParameter("@p0", storeId);
+        cmd.Parameters.Add(param);
+
+        using SqlDataReader reader = cmd.ExecuteReader();
+        Inventory inv = new();
+        if (await reader.ReadAsync())
+        {
+            inv.Id = reader.GetInt32(0);
+            inv.Store = reader.GetInt32(1);
+            inv.Item = reader.GetInt32(2);
+            inv.Qty = reader.GetInt32(3);
+        }
+
+        connection.Close();
+        return inv;
     }
 
     /// <summary>
@@ -349,53 +386,6 @@ public class DBRepo : IRepo
         }
     }
 
-    /// <summary>
-    /// The job of this method is to remove an entire row from inventory when qty equals 0
-    /// </summary>
-    /// <param name="invId"></param>
-    public void RemoveInventory(int invId)
-    {
-        //throw new NotImplementedException();
-        using(SqlConnection connection = new SqlConnection(_connectionString))
-        {
-            connection.Open();
-            string sqlCmd = "DELETE FROM Inventory WHERE Id = @p0"; //Where store is wrong?
-            using(SqlCommand cmd = new SqlCommand(sqlCmd, connection))
-            {
-                //SqlParameter param = (new SqlParameter("@p1", qtyToChange));
-                cmd.Parameters.AddWithValue("@p0", invId);
-                //...
-
-                int changed = cmd.ExecuteNonQuery();
-                Console.WriteLine($"Remove Inventory: changed: {changed}, invId: {invId}");
-            }
-            connection.Close();
-        }
-    }
-    //OBSOLETE, Old UI depended on differnt value sot dele inventory, it should go by inventory id only best practice
-    /// <summary>
-    /// The job of this method is to remove an entire row from inventory when store is deleted
-    /// </summary>
-    /// <param name="storePK"></param>
-    //public void RemoveOrphanInventory(int storePK)
-    //{
-    //    //throw new NotImplementedException();
-    //    using(SqlConnection connection = new SqlConnection(_connectionString))
-    //    {
-    //        connection.Open();
-    //        string sqlCmd = "DELETE FROM Inventory WHERE Store = @p0"; //Where store is wrong?
-    //        using(SqlCommand cmd = new SqlCommand(sqlCmd, connection))
-    //        {
-    //            //SqlParameter param = (new SqlParameter("@p1", qtyToChange));
-    //            cmd.Parameters.AddWithValue("@p0", storePK);
-    //            //...
-
-    //            int changed = cmd.ExecuteNonQuery();
-    //            Console.WriteLine($"Remove Orphan Inventory: changed: {changed}, storePK: {storePK}");
-    //        }
-    //        connection.Close();
-    //    }
-    //}
 
     //------------------------------------------------------------------------------\\
     //<>                              Carried Items                               <>\\
@@ -494,7 +484,7 @@ public class DBRepo : IRepo
         //throw new NotImplementedException();
         using(SqlConnection connection = new SqlConnection(_connectionString))
         {
-            Console.WriteLine($"changeCarriedItem.APN: {changeCarriedItem.APN}, changeCarriedItem.Cost: {changeCarriedItem.Cost}");
+            //Console.WriteLine($"changeCarriedItem.APN: {changeCarriedItem.APN}, changeCarriedItem.Cost: {changeCarriedItem.Cost}");
             connection.Open(); 
             string sqlCmd = "UPDATE Carried SET Name = @p1, ItemType = @p2, Weight = @p3, Cost = @p4, Descript = @p5 WHERE APN = @p0";
             using(SqlCommand cmd = new SqlCommand(sqlCmd, connection))
@@ -514,63 +504,6 @@ public class DBRepo : IRepo
         }
     }
 
-
-    //I already have a method AddCarried, Why does this exists?
-    /// <summary>
-    /// Add item to list of carried items
-    /// </summary>
-    /// <param name="invToAdd"></param>
-    //public void AddItem(ProdDetails invToAdd)//maybe first parameter becomes storeID  //int invIndex, 
-    //{
-    //    //throw new NotImplementedException();  
-    //    using (SqlConnection connection = new SqlConnection(_connectionString))
-    //    {
-    //        connection.Open();
-    //        string sqlCmd = "INSERT INTO Carried (APN, Name, ItemType, Weight, Cost, Descript) VALUES (@p1, @p2, @p4, @5, @6, @7)";
-
-    //        using (SqlCommand cmd = new SqlCommand(sqlCmd, connection))
-    //        {
-    //            SqlParameter param = (new SqlParameter("@p1", invToAdd.APN));
-    //            cmd.Parameters.Add(param);
-    //            param = (new SqlParameter("@p2", invToAdd.Name));
-    //            cmd.Parameters.Add(param);
-    //            param = (new SqlParameter("@p4", invToAdd.ItemType));
-    //            cmd.Parameters.Add(param);
-    //            param = (new SqlParameter("@p5", invToAdd.Weight));
-    //            cmd.Parameters.Add(param);
-    //            param = (new SqlParameter("@p6", invToAdd.Cost));
-    //            cmd.Parameters.Add(param);
-    //            param = (new SqlParameter("@p7", invToAdd.Descr));
-    //            cmd.Parameters.Add(param);
-    //            //...
-
-    //            cmd.ExecuteNonQuery();
-    //        }
-    //        connection.Close();
-    //    }
-    //}
-
-    /// <summary>
-    /// Remove item in list of carried items
-    /// </summary>
-    /// <param name="apnToRemove"></param>
-    public void RemoveItem(int apnToRemove)
-    {
-        //throw new NotImplementedException();
-        using (SqlConnection connection = new SqlConnection(_connectionString))
-        {
-            connection.Open();
-            string sqlCmd = "DELETE FROM Carried WHERE APN = @p0";
-            using (SqlCommand cmd = new SqlCommand(sqlCmd, connection))
-            {
-                cmd.Parameters.AddWithValue("@p0", apnToRemove);
-
-                int changed = cmd.ExecuteNonQuery();
-                Console.WriteLine($"Removed item: changed: {changed}, invIndex: {apnToRemove}");
-            }
-            connection.Close();
-        }
-    }
 
     //------------------------------------------------------------------------------\\
     //<>                              Line Items                                  <>\\
@@ -601,6 +534,34 @@ public class DBRepo : IRepo
             }
         }   
         return allLISQL;
+    }
+
+    //Return Lineitems by ID
+    public async Task<LineItems> GetLineitemsByIdAsync(int lineitemId) //Added async and Task<> and Async to name
+    {
+        string query = "SELECT * FROM Lineitems WHERE Id = @p0";
+        using SqlConnection connection = new SqlConnection(_connectionString);
+        connection.Open();
+        using SqlCommand cmd = new SqlCommand(query, connection);
+        SqlParameter param = new SqlParameter("@p0", lineitemId);
+        cmd.Parameters.Add(param);
+
+        using SqlDataReader reader = cmd.ExecuteReader();
+        LineItems lineitem = new LineItems();
+        //if(reader.Read()) 
+        if (await reader.ReadAsync())
+        {
+            lineitem.Id = reader.GetInt32(0);
+            lineitem.InvId = reader.GetInt32(1);
+            lineitem.OrderId = reader.GetInt32(2);
+            lineitem.Qty = reader.GetInt32(3);
+            lineitem.CostPerItem = reader.GetDecimal(4);
+            lineitem.SalesTax = reader.GetDecimal(5);
+            lineitem.PastOrder = reader.GetBoolean(6);
+        }
+
+        connection.Close();
+        return lineitem;
     }
 
     /// <summary>
@@ -639,52 +600,6 @@ public class DBRepo : IRepo
         }
     }
 
-    /// <summary>
-    /// Allows manager to remove an item from line items in teh database
-    /// </summary>
-    /// <param name="lineItemIdToRemove"></param>
-    public void RemoveLineItem(int lineItemIdToRemove)
-    {
-        //throw new NotImplementedException();
-        using(SqlConnection connection = new SqlConnection(_connectionString))
-        {
-            connection.Open();
-            string sqlCmd = "DELETE FROM LineItems WHERE InvId = @p0";
-            using(SqlCommand cmd = new SqlCommand(sqlCmd, connection))
-            {
-                cmd.Parameters.AddWithValue("@p0", lineItemIdToRemove);
-                //...
-
-                int changed = cmd.ExecuteNonQuery();
-                Console.WriteLine($"RemoveLineItem: changed: {changed}, lineToRemove: {lineItemIdToRemove}");//DEBUGGING
-            }
-            connection.Close();
-        }
-    }
-
-    /// <summary>
-    /// Removes a line item from database when the associated store is also removed
-    /// </summary>
-    /// <param name="orderId"></param>
-    public void RemoveOrphanLineItem(int orderId)
-    {
-        //throw new NotImplementedException();
-        using(SqlConnection connection = new SqlConnection(_connectionString))
-        {
-            connection.Open();
-            string sqlCmd = "DELETE FROM LineItems WHERE OrderId = @p0";
-            using(SqlCommand cmd = new SqlCommand(sqlCmd, connection))
-            {
-                cmd.Parameters.AddWithValue("@p0", orderId);
-                //...
-
-                int changed = cmd.ExecuteNonQuery();
-                Console.WriteLine($"RemoveOrphanLineItem: changed: {changed}, orderId: {orderId}");//DEBUGGING
-            }
-            connection.Close();
-        }
-    }
-
     public void FinalizeLineItem(LineItems finalLineItem)
     {
         //throw new NotImplementedException();
@@ -708,7 +623,6 @@ public class DBRepo : IRepo
     //------------------------------------------------------------------------------\\
     //<>                                Orders                                    <>\\
     //------------------------------------------------------------------------------\\
-
     /// <summary>
     /// Returns a list of all orders from the database
     /// </summary>
@@ -727,7 +641,7 @@ public class DBRepo : IRepo
         DataTable? ordTable = CSSet.Tables["Orders"];
             
         if(ordTable != null)
-        { 
+        {
             foreach(DataRow row in ordTable.Rows)
             {
                 Orders ordo = new Orders(row);
@@ -737,6 +651,36 @@ public class DBRepo : IRepo
         //Console.WriteLine("Finished Get Orders");    
         return allOrdSQL;
     }
+
+
+    //Return Order by ID
+    public async Task<Orders> GetOrderByIdAsync(int orderId) //Added async and Task<> and Async to name
+    {
+        string query = "SELECT * FROM Orders WHERE OrderId = @ordoId";
+        using SqlConnection connection = new SqlConnection(_connectionString);
+        connection.Open();
+        using SqlCommand cmd = new SqlCommand(query, connection);
+        SqlParameter param = new SqlParameter("@ordoId", orderId);
+        cmd.Parameters.Add(param);
+
+        using SqlDataReader reader = cmd.ExecuteReader();
+        Orders order = new Orders();
+        //if(reader.Read()) 
+        if (await reader.ReadAsync())
+        {
+            order.OrderId = reader.GetInt32(0);
+            order.CustomerId = reader.GetInt32(1);
+            order.StoreId = reader.GetInt32(2);
+            order.OrderDate = reader.GetDateTime(3);
+            order.TotalQty = reader.GetInt32(4);
+            order.TotalCost = reader.GetDecimal(5);
+            order.OrderCompleted = reader.GetInt32(6);
+        }
+
+        connection.Close();
+        return order;
+    }
+
 
     /// <summary>
     /// Adds a new order to the database
@@ -782,9 +726,8 @@ public class DBRepo : IRepo
     /// Adds total quantity and cost to the order and makes the order as completed
     /// This is called after a purchase is confirmed
     /// </summary>
-    /// <param name="orderIndex"></param>
     /// <param name="finalDetails"></param>
-    public void FinalizeOrder(int orderIndex, Orders finalDetails)
+    public void FinalizeOrder(Orders finalDetails)
     {
         //throw new NotImplementedException();
         using(SqlConnection connection = new SqlConnection(_connectionString))
@@ -806,20 +749,29 @@ public class DBRepo : IRepo
         }
     }
 
-    /// <summary>
-    /// In the event a store is closed, all it's records are deleted
-    /// </summary>
-    /// <param name="ordersToDelete"></param>
-    public void DeleteOrders(int ordersToDelete)
+    public void OmniDelete(int whatTable, int idToDelete)
     {
+        //Omni Delete logic
+        //Add another parameter to select table to delete from
+        //Set two string vars like = "Orders"  = "OrderId" to set to approriate columns and tables
+        string tableName = "";
+        string idStr = "";
+
+        if (whatTable == 1) { tableName = "Lineitems"; idStr = "Id"; }//Lineitems
+        if (whatTable == 2) { tableName = "Inventory"; idStr = "Id"; }//Inventory
+        if (whatTable == 3) { tableName = "Carried"; idStr = "APN"; }//Carried
+        if (whatTable == 4) { tableName = "Orders"; idStr = "OrderId"; }//Orders
+        if (whatTable == 5) { tableName = "Customers"; idStr = "CustNumb"; }//Customers
+        if (whatTable == 6) { tableName = "Store"; idStr = "StoreId"; }//Store
+
         //throw new NotImplementedException();
-        using(SqlConnection connection = new SqlConnection(_connectionString))
+        using (SqlConnection connection = new SqlConnection(_connectionString))
         {
             connection.Open();
-            string sqlCmd = "DELETE FROM Orders WHERE StoreId = @p0";
-            using(SqlCommand cmd = new SqlCommand(sqlCmd, connection))
+            string sqlCmd = $"DELETE FROM {tableName} WHERE {idStr} = @p0"; //Find Store Id before calling this
+            using (SqlCommand cmd = new SqlCommand(sqlCmd, connection))
             {
-                cmd.Parameters.AddWithValue("@p0", ordersToDelete);
+                cmd.Parameters.AddWithValue("@p0", idToDelete);
                 //...
 
                 int changed = cmd.ExecuteNonQuery();
