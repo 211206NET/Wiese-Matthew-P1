@@ -1,0 +1,1 @@
+2022-01-24 21:12:25.429 -08:00 [INF] A customer mas deleted!

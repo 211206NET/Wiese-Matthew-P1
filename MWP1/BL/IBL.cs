@@ -30,7 +30,6 @@ public interface IBL
     Task<ProdDetails> GetCarriedByIdAsync(int carriedId);
     void AddCarried(ProdDetails itemNew);
     void ChangeCarried(ProdDetails changeCarriedItem);
-    void RemoveItem(int apnToRemove);
 
     //Line Items
     List<LineItems> GetAllLineItem();

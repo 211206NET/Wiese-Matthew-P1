@@ -4,6 +4,7 @@ using BL;
 using CustomExceptions;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.AspNetCore.Authorization;
+using Serilog;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 //Need CRUD
@@ -16,12 +17,14 @@ namespace WebAPI.Controllers
         //===================================================() Initialize ()===================================================\\
         private IBL _bl;
         private IMemoryCache _memoryCache; //put in Ilogger
-        private ILogger _logger;
+        //private ILogger _logger;
+        //public string? Message { get; set; }
 
-        public StoreController(IBL bl, IMemoryCache memoryCache)
+        public StoreController(IBL bl, IMemoryCache memoryCache)//, ILogger<StoreController> logger)
         {
             _bl = bl;
             _memoryCache = memoryCache;
+            //_logger = logger;
         }
 
         //------------------------------------------------<> GetAllStores <>---------------------------------------------------\\
@@ -62,6 +65,9 @@ namespace WebAPI.Controllers
             try
             {
                 _bl.AddStore(storeToAdd);
+                //Message = $"Store made!";
+                //_logger.LogInformation(Message);
+                Serilog.Log.Information("A store was made!");
                 return Created("Store added!",storeToAdd);
             }
             catch(DuplicateRecordException ex)//Doesn't catch, I used the duplicate method in DBRepo to catch it instead
@@ -103,6 +109,7 @@ namespace WebAPI.Controllers
             }
             //_bl.RemoveStore(id);
             _bl.OmniDelete(6,id);
+            Serilog.Log.Information("A store was deleted!");
             return Ok();
         }
     }

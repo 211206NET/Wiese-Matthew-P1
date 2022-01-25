@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-using Microsoft.AspNetCore.Mvc;
 using Models;
 using BL;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.AspNetCore.Authorization;
+using Serilog;
 
 namespace WebAPI.Controllers
 {
@@ -16,7 +16,7 @@ namespace WebAPI.Controllers
         //===================================================() Initialize ()===================================================\\
         private IBL _bl;
         private IMemoryCache _memoryCache; //put in Ilogger
-        private ILogger _logger;
+        //private ILogger _logger;
 
         public OrdersController(IBL bl, IMemoryCache memoryCache)
         {
@@ -104,6 +104,7 @@ namespace WebAPI.Controllers
             }
             //_bl.DeleteOrders(id);
             _bl.OmniDelete(4, id);
+            Serilog.Log.Information("An Order mas deleted!");
             return Ok();
         }
     }

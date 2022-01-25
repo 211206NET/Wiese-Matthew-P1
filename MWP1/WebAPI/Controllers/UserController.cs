@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Models;
 using BL;
 using Microsoft.Extensions.Caching.Memory;
+using Serilog;
 
 namespace WebAPI.Controllers
 {
@@ -13,7 +14,7 @@ namespace WebAPI.Controllers
         //===================================================() Initialize ()===================================================\\
         private IBL _bl;
         private IMemoryCache _memoryCacheC; //put in Ilogger
-        private ILogger _logger;
+        //private ILogger _logger;
 
         public UserController(IBL bl, IMemoryCache memoryCache)
         {
@@ -62,6 +63,7 @@ namespace WebAPI.Controllers
             {
                 _bl.AddCustomer(addCust);
                 //Created 201
+                Serilog.Log.Information("A user was made!");
                 return Created("Good", addCust);
             }
             catch (Exception ex)
@@ -104,6 +106,7 @@ namespace WebAPI.Controllers
             //}
             //_bl.RemoveInventory(id);
             _bl.OmniDelete(5, id);
+            Serilog.Log.Information("A customer mas deleted!");
             //return Ok();
         }
 

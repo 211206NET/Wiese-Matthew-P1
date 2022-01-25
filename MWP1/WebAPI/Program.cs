@@ -1,7 +1,12 @@
 using DL;
 using BL;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.File(@"..\DL\SeriLog.txt")
+    .CreateLogger();
 
 // Add services to the container.
 

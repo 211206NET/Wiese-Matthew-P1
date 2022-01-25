@@ -3,6 +3,7 @@ using Models;
 using BL;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.AspNetCore.Authorization;
+using Serilog;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace WebAPI.Controllers
@@ -14,7 +15,7 @@ namespace WebAPI.Controllers
         //===================================================() Initialize ()===================================================\\
         private IBL _bl;
         private IMemoryCache _memoryCache; //put in Ilogger
-        private ILogger _logger;
+        //private ILogger _logger;
 
         public LineItemController(IBL bl, IMemoryCache memoryCache)
         {
@@ -104,6 +105,7 @@ namespace WebAPI.Controllers
             }
             //_bl.RemoveLineItem(id);
             _bl.OmniDelete(1, id);
+            Serilog.Log.Information("An Lineitems mas deleted!");
             return Ok();
         }
     }
