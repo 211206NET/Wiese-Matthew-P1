@@ -56,6 +56,11 @@ public class CSBL : IBL
         _dl.ChangeUserInfo(changeCustomerInfo);
     }
 
+    public bool Login(string userName, string password)
+    {
+        return _dl.Login(userName, password);
+    }
+
     //------------------------------------------------------------------------------\\
     //<>                               Inventory                                  <>\\
     //------------------------------------------------------------------------------\\
@@ -63,6 +68,11 @@ public class CSBL : IBL
     public List<Inventory> GetAllInventory()
     {
         return _dl.GetAllInventory();
+    }
+
+    public List<Inventory> GetAllInventoryByStore(int storeId)
+    {
+        return _dl.GetAllInventoryByStore(storeId);
     }
 
     public async Task<Inventory> GetAllInventoryByStoreAsync(int storeId)
@@ -137,6 +147,11 @@ public class CSBL : IBL
         return _dl.GetAllOrders();
     }
 
+    public List<Orders> GetAllOrderByStore(int storeId)
+    {
+        return _dl.GetAllOrderByStore(storeId);
+    }
+
     public async Task<Orders> GetOrderByIdAsync(int orderId)
     {
         return await _dl.GetOrderByIdAsync(orderId);
@@ -146,6 +161,11 @@ public class CSBL : IBL
     public void AddOrder(Orders orderItems)
     {
         _dl.AddOrder(orderItems);
+    }
+
+    public void PlaceOrder(int orderId)
+    {
+        _dl.PlaceOrder(orderId);
     }
 
     public void FinalizeOrder(Orders finalDetails)

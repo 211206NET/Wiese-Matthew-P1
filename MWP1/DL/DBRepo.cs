@@ -275,6 +275,25 @@ public class DBRepo : IRepo
         }
     }
 
+    //Login User
+    public bool Login(string userName, string password)
+    {
+        List<Customers> currUser = GetAllCustomers();
+        bool isIn = false;
+
+        foreach(Customers customers in currUser)
+        {
+            if (customers.UserName == userName && customers.Pass == password)
+            {
+                isIn = true;
+                return true;
+            }
+        }
+
+        return false;
+
+    }
+
 
     //------------------------------------------------------------------------------\\
     //<>                               Inventory                                  <>\\
@@ -299,6 +318,34 @@ public class DBRepo : IRepo
         if(InvTable != null)
         { 
             foreach(DataRow row in InvTable.Rows)
+            {
+                Inventory invo = new Inventory(row);
+                allInvSQL.Add(invo);
+            }
+        }
+        return allInvSQL;
+    }
+
+
+    public List<Inventory> GetAllInventoryByStore(int storeId)
+    {
+        List<Inventory> allInvSQL = new List<Inventory>();
+        using SqlConnection connection = new SqlConnection(_connectionString);
+        string invToSelect = $"SELECT * FROM Inventory WHERE Store = {storeId}";
+        DataSet CSSet = new DataSet();
+
+        using SqlDataAdapter invAdapter = new SqlDataAdapter(invToSelect, connection);
+        invAdapter.Fill(CSSet, "Inventory");
+        DataTable? InvTable = CSSet.Tables["Inventory"];
+
+        //using SqlCommand cmd = new SqlCommand(invToSelect, connection);
+        //SqlParameter param = new SqlParameter("@p0", storeId);
+        //cmd.Parameters.Add(param);
+
+
+        if (InvTable != null)
+        {
+            foreach (DataRow row in InvTable.Rows)
             {
                 Inventory invo = new Inventory(row);
                 allInvSQL.Add(invo);
@@ -653,6 +700,31 @@ public class DBRepo : IRepo
     }
 
 
+
+    public List<Orders> GetAllOrderByStore(int storeId)
+    {
+        List<Orders> allInvSQL = new List<Orders>();
+        using SqlConnection connection = new SqlConnection(_connectionString);
+        string invToSelect = $"SELECT * FROM Orders WHERE StoreId = {storeId}";
+        DataSet CSSet = new DataSet();
+
+        using SqlDataAdapter invAdapter = new SqlDataAdapter(invToSelect, connection);
+        invAdapter.Fill(CSSet, "Orders");
+        DataTable? InvTable = CSSet.Tables["Orders"];;
+
+
+        if (InvTable != null)
+        {
+            foreach (DataRow row in InvTable.Rows)
+            {
+                Orders oro = new Orders(row);
+                allInvSQL.Add(oro);
+            }
+        }
+        return allInvSQL;
+    }
+
+
     //Return Order by ID
     public async Task<Orders> GetOrderByIdAsync(int orderId) //Added async and Task<> and Async to name
     {
@@ -720,6 +792,44 @@ public class DBRepo : IRepo
             }
             connection.Close();
         }
+    }
+
+
+    public void PlaceOrder(int orderId)
+    {
+        int getCustId = 0;
+        decimal getRunTotal = 0;
+        int runQty = 0;
+        int countOrd = 0;
+        int countLI = 0;
+        List<LineItems> li = GetAllLineItem();
+        foreach (LineItems liItem in li)
+        {
+            if(liItem.OrderId == orderId)
+            {
+                getRunTotal += liItem.CostPerItem;
+                runQty += liItem.Qty;
+                liItem.PastOrder = true;
+            }
+            FinalizeLineItem(li[countLI]);
+            countLI++;
+        }
+
+        List<Orders> ord = GetAllOrders();
+        foreach (Orders oro in ord)
+        {
+            if (oro.OrderId == orderId)
+            {
+                getCustId = oro.CustomerId;
+                oro.OrderCompleted = 1;
+                oro.TotalCost = getRunTotal;
+                oro.TotalQty = runQty;
+            }
+
+            FinalizeOrder(ord[countOrd]);
+            countOrd++;
+        }
+
     }
 
     /// <summary>

@@ -38,6 +38,14 @@ namespace WebAPI.Controllers
             return allInventory;
         }
 
+        [HttpGet("{id}")]
+        public List<Inventory> Get(int id)
+        {
+            List<Inventory> allStoreInv;// = _bl.GetAllStores();
+            allStoreInv =  _bl.GetAllInventoryByStore(id);
+            return allStoreInv;
+        }
+        /*
         //------------------------------------------------<> GetAllInventoryByStore <>---------------------------------------------------\\
         // GET: api/<InventoryController>
         [HttpGet("{id}")]
@@ -52,7 +60,7 @@ namespace WebAPI.Controllers
             {
                 return NoContent();
             }
-        }
+        }*/
 
         //------------------------------------------------<> AddInventory <>---------------------------------------------------\\
         // POST api/<InventoryController>

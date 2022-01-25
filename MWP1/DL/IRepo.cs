@@ -25,9 +25,11 @@ public interface IRepo
     Task<Customers> GetCustomerByIdAsync(int customerId);
     void AddCustomer(Customers addCust);//int custNum, string userName, string pass);
     void ChangeUserInfo(Customers changeCustomerInfo);
+    bool Login(string userName, string password);
 
     //Inventory
     List<Inventory> GetAllInventory();
+    List<Inventory> GetAllInventoryByStore(int storeId);
     Task<Inventory> GetAllInventoryByStoreAsync(int storeId);
     void AddInventory(Inventory invToAdd);
     void ChangeInventory(int invIndex, int qtyToChange);
@@ -46,8 +48,10 @@ public interface IRepo
 
     //Orders
     List<Orders> GetAllOrders();
+    List<Orders> GetAllOrderByStore(int storeId);
     Task<Orders> GetOrderByIdAsync(int orderId);
     void AddOrder(Orders orderItems);
+    void PlaceOrder(int orderId);
     void FinalizeOrder(Orders finalDetails);
 
     //Omni

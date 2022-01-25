@@ -38,6 +38,21 @@ namespace WebAPI.Controllers
             return allOrders;
         }
 
+        //------------------------------------------------<> METHOD <>---------------------------------------------------\\
+        // GET: api/<OrdersController>
+        [HttpGet("{storeId}")]
+        public List<Orders> Get(int storeId)//Get All
+        {
+            List<Orders> allOrders;// = _bl.GetAllStores();
+            if (!_memoryCache.TryGetValue("Orders", out allOrders))//null ref
+            {
+                allOrders = _bl.GetAllOrderByStore(storeId);
+                _memoryCache.Set("orders", allOrders, new TimeSpan(0, 0, 30));
+            }
+            return allOrders;
+        }
+
+        /*
         //------------------------------------------------<> GetOrderByIdAsync <>---------------------------------------------------\\
         // GET api/<OrdersController>/5
         [HttpGet("{id}")]
@@ -53,6 +68,7 @@ namespace WebAPI.Controllers
                 return NoContent();
             }
         }
+        */
 
         //------------------------------------------------<> AddOrder <>---------------------------------------------------\\
         // POST api/<OrdersController>
@@ -71,6 +87,17 @@ namespace WebAPI.Controllers
                 return Conflict(ex.Message);
             }
         }
+
+        //------------------------------------------------<> FinalizeOrder <>---------------------------------------------------\\
+        // PUT api/<OrdersController>/5
+        [HttpPost("{id}")]
+        //public void Put(int id, [FromBody] int value)
+        public void Post(int orderId)
+        {
+            _bl.PlaceOrder(orderId);
+            //Created 201
+        }
+
 
         //------------------------------------------------<> FinalizeOrder <>---------------------------------------------------\\
         // PUT api/<OrdersController>/5

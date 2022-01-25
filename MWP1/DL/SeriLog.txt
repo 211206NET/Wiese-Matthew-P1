@@ -1,1 +1,9 @@
 2022-01-24 21:12:25.429 -08:00 [INF] A customer mas deleted!
+2022-01-25 07:13:24.243 -08:00 [INF] A new product was added!
+2022-01-25 08:53:27.976 -08:00 [INF] An Lineitems mas deleted!
+2022-01-25 09:07:00.943 -08:00 [INF] A new product was added!
+2022-01-25 09:09:34.266 -08:00 [INF] A store was deleted!
+2022-01-25 09:13:30.406 -08:00 [INF] A user was made!
+2022-01-25 09:20:48.617 -08:00 [INF] A store was made!
+2022-01-25 09:28:30.958 -08:00 [INF] An Inventory mas deleted!
+2022-01-25 09:54:44.298 -08:00 [INF] A customer mas deleted!

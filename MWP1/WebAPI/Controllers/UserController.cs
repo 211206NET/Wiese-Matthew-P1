@@ -38,6 +38,18 @@ namespace WebAPI.Controllers
         }
 
 
+        //-----------------------------------------------<> Login <>--------------------------------------------------\\
+        // GET: UserController
+        [HttpGet("username,password")]
+        public bool Get(string username, string password)//Get All
+        {
+            bool ok;
+            ok = _bl.Login(username, password);
+            if (ok == true) { return true; }
+            return false;
+        }
+
+
         //--------------------------------------------<> GetCustomerByIdAsync <>-----------------------------------------------\\
         // GET api/<StoreController>/5 Get value or something abse don id e.g 5
         [HttpGet("{id}")]
