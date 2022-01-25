@@ -37,6 +37,22 @@ namespace WebAPI.Controllers
             return allInventory;
         }
 
+        //------------------------------------------------<> GetAllInventoryByStore <>---------------------------------------------------\\
+        // GET: api/<InventoryController>
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Inventory>> GetAsync(int storeId)
+        {
+            Inventory foundInventory = await _bl.GetAllInventoryByStoreAsync(storeId);
+            if (foundInventory.Id != 0)
+            {
+                return Ok(foundInventory);
+            }
+            else
+            {
+                return NoContent();
+            }
+        }
+
         //------------------------------------------------<> AddInventory <>---------------------------------------------------\\
         // POST api/<InventoryController>
         [HttpPost]
@@ -78,14 +94,15 @@ namespace WebAPI.Controllers
         //------------------------------------------------<> RemoveInventory <>---------------------------------------------------\\
         // DELETE api/<InventoryController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public void Delete(int table, int id)
         {
             //Inventory selectInventory = await _bl.GetStoreByIdAsync(id);
             //if (selectInventory.Id == null)
             //{
             //    //return NoContent();
             //}
-            _bl.RemoveInventory(id);
+            //_bl.RemoveInventory(id);
+            _bl.OmniDelete(2, id);
             //return Ok();
         }
 

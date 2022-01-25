@@ -71,5 +71,41 @@ namespace WebAPI.Controllers
             }
         }
 
+        //-------------------------------------------------<> ChangeUserInfo <>--------------------------------------------------\\
+        // PUT api/<StoreController>/5  add to something
+        //[Authorize]
+        [HttpPut("{id}")]
+        //public void Put(int id, [FromBody] int value)
+        public ActionResult Put([FromBody] Customers changeCustomerInfo)
+        {
+            try
+            {
+                _bl.ChangeUserInfo(changeCustomerInfo);
+                //Created 201
+                return Created("Store updated", changeCustomerInfo);
+            }
+            catch (Exception ex)
+            {
+                //Dupelicate is 409, but I can't test that yet, don't know how
+                return Conflict(ex.Message);
+            }
+
+        }
+
+        //------------------------------------------------<> RemoveCustomer <>---------------------------------------------------\\
+        // DELETE api/<InventoryController>/5
+        [HttpDelete("{id}")]
+        public void Delete(int table, int id)
+        {
+            //Inventory selectInventory = await _bl.GetStoreByIdAsync(id);
+            //if (selectInventory.Id == null)
+            //{
+            //    //return NoContent();
+            //}
+            //_bl.RemoveInventory(id);
+            _bl.OmniDelete(5, id);
+            //return Ok();
+        }
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Models;
 using BL;
+using CustomExceptions;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.AspNetCore.Authorization;
 
@@ -61,12 +62,10 @@ namespace WebAPI.Controllers
             try
             {
                 _bl.AddStore(storeToAdd);
-                //Created 201
-                return Created("Good",storeToAdd);
+                return Created("Store added!",storeToAdd);
             }
-            catch(Exception ex)
+            catch(DuplicateRecordException ex)//Doesn't catch, I used the duplicate method in DBRepo to catch it instead
             {
-                //Dupelicate is 409, but I can't test that yet, don't know how
                 return Conflict(ex.Message);
             }
         }
@@ -82,7 +81,7 @@ namespace WebAPI.Controllers
             {
                 _bl.ChangeStoreInfo(changeStoreInfo);
                 //Created 201
-                return Created("Product updated", changeStoreInfo);
+                return Created("Store updated", changeStoreInfo);
             }
             catch (Exception ex)
             {
@@ -95,15 +94,16 @@ namespace WebAPI.Controllers
         //-------------------------------------------------<> RemoveStore <>--------------------------------------------------\\
         // DELETE api/<StoreController>/5  delete the thing, Cannot delete store until FKs are clear first
         [HttpDelete("{id}")]
-        public async void Delete(int id)
+        public async Task<ActionResult> Delete(int table, int id)
         {
             Store selectStore = await _bl.GetStoreByIdAsync(id);
-            if (selectStore.StoreID == null)
+            if (selectStore.StoreID == 0)
             {
-                //return NoContent();
+                return NoContent();
             }
-            _bl.RemoveStore(id);
-            //return Ok();
+            //_bl.RemoveStore(id);
+            _bl.OmniDelete(6,id);
+            return Ok();
         }
     }
 }

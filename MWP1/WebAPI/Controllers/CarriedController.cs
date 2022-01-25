@@ -53,25 +53,57 @@ namespace WebAPI.Controllers
             }
         }
 
-        //------------------------------------------------<> METHOD <>---------------------------------------------------\\
+        //------------------------------------------------<> AddCarried <>---------------------------------------------------\\
         // POST api/<CarriedController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public ActionResult<ProdDetails> Post([FromBody] ProdDetails carriedToAdd)
         {
+            try
+            {
+                _bl.AddCarried(carriedToAdd);
+                //Created 201
+                return Created("Product added to list of carried items", 201);
+            }
+            catch (Exception ex)
+            {
+                //Dupelicate is 409, but I can't test that yet, don't know how
+                return Conflict(ex.Message);
+            }
         }
 
-        //------------------------------------------------<> METHOD <>---------------------------------------------------\\
+        //------------------------------------------------<> ChangeCarried <>---------------------------------------------------\\
         // PUT api/<CarriedController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        //public void Put(int id, [FromBody] int value)
+        public ActionResult Put([FromBody] ProdDetails changeProdDetailsInfo)
         {
+            try
+            {
+                _bl.ChangeCarried(changeProdDetailsInfo);
+                //Created 201
+                return Created("Product updated", changeProdDetailsInfo);
+            }
+            catch (Exception ex)
+            {
+                //Dupelicate is 409, but I can't test that yet, don't know how
+                return Conflict(ex.Message);
+            }
+
         }
 
-        //------------------------------------------------<> METHOD <>---------------------------------------------------\\
+        //------------------------------------------------<> RemoveItem <>---------------------------------------------------\\
         // DELETE api/<CarriedController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public void Delete(int table, int id)
         {
+            //ProdDetails selectCarried = _bl.RemoveItem(id);
+            //if (selectCarried.APN == null)
+            //{
+                //return NoContent();
+            //}
+            //_bl.RemoveItem(id);
+            _bl.OmniDelete(3, id);
+            //return Ok();
         }
     }
 }
