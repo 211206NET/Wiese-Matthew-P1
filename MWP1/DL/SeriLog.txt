@@ -7,3 +7,5 @@
 2022-01-25 09:20:48.617 -08:00 [INF] A store was made!
 2022-01-25 09:28:30.958 -08:00 [INF] An Inventory mas deleted!
 2022-01-25 09:54:44.298 -08:00 [INF] A customer mas deleted!
+2022-01-27 19:34:43.593 -08:00 [INF] A store was made!
+2022-01-27 19:36:21.426 -08:00 [INF] A store was made!

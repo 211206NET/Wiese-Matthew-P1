@@ -1,0 +1,79 @@
+How to ORM based on P1 project using VS Code
+
+1.) Make Free ElephantSQL server
+
+2.) In your DL:
+    dotnet add package Microsoft.EntityFrameworkCore.Design
+    dotnet add package Microsoft.EntityFrameworkCore.Tools
+    dotnet tool install --global dotnet-ef
+    dotnet ef
+    dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL
+
+3.) Make XXDBContext.cs in DL: (mine is CSDBContext.cs)
+    See week 8 github restaurant example
+
+4.) In WebAPI: (Check in csproj files to ensure packages are installed)
+    dotnet add package Microsoft.EntityFrameworkCore.Design\
+
+5.) Set Up Program.cs in WebAPI:
+
+    //To use ef repo or something and point to new connection string
+    builder.Services.AddDbContext<DbContext, CSDBContext>(options => options.UseNpgsql(
+        builder.Configuration.GetConnectionString("PostgreCSDB")
+    ));
+
+    //ORM code (For one for each interface if you split them up)
+    builder.Services.AddScoped<IStoreRepo, EFRepo>();
+    builder.Services.AddScoped<IStoreBL, ClayStoreBL>();
+
+    // Configure the HTTP request pipeline.
+    //if (app.Environment.IsDevelopment()) Remove this condition if you have it
+    //{
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    //}
+
+6.) Set up Connection String in appsettings.json (Your details for string are from ElephantSQL details)
+
+    {
+    "Logging": {
+        "LogLevel": {
+        "Default": "Information",
+        "Microsoft.AspNetCore": "Warning"
+        }
+    },
+    "AllowedHosts": "*",
+    
+    "ConnectionStrings": {
+        "PostgreCSDB": "Host=kashin.db.elephantsql.com;Username=fupvyvuj;Password=lw5SwNLn8o4S_6AcoNmGhXXVL1ndLN20;Database=fupvyvuj"
+    }
+    }
+
+7.) In DL Again: (Whatever you named XXDBContext)
+    dotnet ef migrations add initMig -c XXDBContext --startup-project ../WebAPI
+
+8.) Make EFRepo in DL:
+    See week 8 github restaurant example
+
+9.) Still in DL (You're app must be able to build for this to work, tables now in Elephant):
+    dotnet ef database update --startup-project ../WebAPI/
+
+10.) Install the extension PostgreSQL:
+    It will add a cool Elephant Icon to the left menu, it is like the left menu in Azure
+
+11.) Click Elephant Icon to left, it will give you pop-ups at the top, get info from Elephant:
+    Hostname = Server *Do not include (kashin-01)*
+    PostgreSQL user = User & Default database
+    password = Password
+    port number = just leave 5432
+    Standard Connection
+    [Optional] database to connect to = User & Default database
+    display name = DungeonDangerSQL or something, up to you
+
+Note:
+Repeat steps for any changes to your models
+dotnet ef migrations add <name of migration> -c <implemented db-context>  --startup-project <location of startup project>
+dotnet ef database update --startup-project <location of startup project>
+
+
+

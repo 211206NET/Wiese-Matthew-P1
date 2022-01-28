@@ -15,12 +15,12 @@ namespace WebAPI.Controllers
     public class StoreController : ControllerBase
     {
         //===================================================() Initialize ()===================================================\\
-        private IBL _bl;
+        private IStoreBL _bl;
         private IMemoryCache _memoryCache; //put in Ilogger
         //private ILogger _logger;
         //public string? Message { get; set; }
 
-        public StoreController(IBL bl, IMemoryCache memoryCache)//, ILogger<StoreController> logger)
+        public StoreController(IStoreBL bl, IMemoryCache memoryCache)//, ILogger<StoreController> logger)
         {
             _bl = bl;
             _memoryCache = memoryCache;
@@ -55,6 +55,13 @@ namespace WebAPI.Controllers
             {
                 return NoContent();
             }
+        }
+
+        //------------------------------------------------<> Search <>-------------------------------------------------------\\
+        [HttpGet("search/{term}")]
+        public List<Store> Search(string term)
+        {
+            return _bl.SearchStores(term);
         }
 
         //------------------------------------------------<> AddStore <>-------------------------------------------------------\\
@@ -97,20 +104,27 @@ namespace WebAPI.Controllers
 
         }
 
+        //-------------------------------------------------<> Delete <>--------------------------------------------------\\
+        // DELETE api/<RestaurantController>/5
+        [HttpDelete("{id}")]
+        public async Task Delete(int id)
+        {
+            _bl.Delete(await _bl.GetStoreByIdAsync(id));
+        }
         //-------------------------------------------------<> RemoveStore <>--------------------------------------------------\\
         // DELETE api/<StoreController>/5  delete the thing, Cannot delete store until FKs are clear first
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int table, int id)
-        {
-            Store selectStore = await _bl.GetStoreByIdAsync(id);
-            if (selectStore.StoreID == 0)
-            {
-                return NoContent();
-            }
-            //_bl.RemoveStore(id);
-            _bl.OmniDelete(6,id);
-            Serilog.Log.Information("A store was deleted!");
-            return Ok();
-        }
+        // [HttpDelete("{id}")]
+        // public async Task<ActionResult> Delete(int table, int id)
+        // {
+        //     Store selectStore = await _bl.GetStoreByIdAsync(id);
+        //     if (selectStore.StoreID == 0)
+        //     {
+        //         return NoContent();
+        //     }
+        //     //_bl.RemoveStore(id);
+        //     _bl.OmniDelete(6,id);
+        //     Serilog.Log.Information("A store was deleted!");
+        //     return Ok();
+        // }
     }
 }

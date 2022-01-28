@@ -20,47 +20,47 @@ public class ControllerTest
 
     //Mock Test
     //Store Controller List Should Return List Of Stores
-    [Fact]
-    public void StoreControllerLSRLS() //One down 19 to go
-    {
-        //Arrange
-        var mockBL = new Mock<IBL>();
-        Store testOne = new Store
-        {
-            StoreID = 100,
-            StoreName = "Test One",
-            City = "City One",
-            State = "State One",
-            SalesTax = 4
-        };
-        Store testTwo = new Store
-        {
-            StoreID = 200,
-            StoreName = "Test two",
-            City = "City Two",
-            State = "State Two",
-            SalesTax = 8
-        };
-        mockBL.Setup(x => x.GetAllStores()).Returns(
-                new List<Store>
-                {
-                    testOne,
-                    testTwo
-                }
-            );
+    // [Fact]
+    // public void StoreControllerLSRLS() //One down 19 to go
+    // {
+    //     //Arrange
+    //     var mockBL = new Mock<IBL>();
+    //     Store testOne = new Store
+    //     {
+    //         StoreID = 100,
+    //         StoreName = "Test One",
+    //         City = "City One",
+    //         State = "State One",
+    //         SalesTax = 4
+    //     };
+    //     Store testTwo = new Store
+    //     {
+    //         StoreID = 200,
+    //         StoreName = "Test two",
+    //         City = "City Two",
+    //         State = "State Two",
+    //         SalesTax = 8
+    //     };
+    //     mockBL.Setup(x => x.GetAllStores()).Returns(
+    //             new List<Store>
+    //             {
+    //                 testOne,
+    //                 testTwo
+    //             }
+    //         );
 
-        IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
-        var strCntrllr = new StoreController(mockBL.Object, cache);
+    //     IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
+    //     var strCntrllr = new StoreController(mockBL.Object, cache);
 
-        //Act
-        var result = strCntrllr.Get();
+    //     //Act
+    //     var result = strCntrllr.Get();
 
-        //Assert
-        Assert.IsType<List<Store>>(result);
-        Assert.Equal(2, result.Count);
-        Assert.Contains(testOne, result);
-        Assert.Contains(testTwo, result);
-    }
+    //     //Assert
+    //     Assert.IsType<List<Store>>(result);
+    //     Assert.Equal(2, result.Count);
+    //     Assert.Contains(testOne, result);
+    //     Assert.Contains(testTwo, result);
+    // }
 
 
     //Mock Test
