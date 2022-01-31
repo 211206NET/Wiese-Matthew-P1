@@ -9,12 +9,17 @@ public class CSDBContext : DbContext
     public CSDBContext(DbContextOptions options) : base(options) {}
 
     public DbSet<Store> Stores { get; set; }
+    public DbSet<Game> Games { get; set; }
 
     //I stop folling here because do I use Microsoft.EntityFrameworkCore.SqlServer or
     //Npgsql.EntityFrameworkCore.PostgreSQL?
-    //dotnet ef migrations add initMig -c CSDBContext.cs --startup-project ../WebAPI
 
-    
+
+    //After every change to models
+    //dotnet ef migrations add initMig2 -c CSDBContext --startup-project ../WebAPI
+    //dotnet ef database update --startup-project ../WebAPI
+
+
     //if you want to manually modify certain columns, properties...
     //map them here
     /*protected override void OnModelCreating(ModelBuilder modelBuilder)

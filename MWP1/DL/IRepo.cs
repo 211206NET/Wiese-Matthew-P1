@@ -15,11 +15,13 @@ public interface IRepo
     //they also lack method body
 
     //Store
+    /*
     List<Store> GetAllStores();
     void AddStore(Store StoreToAdd);
     void ChangeStoreInfo(Store changeStoreInfo);
     Task<Store> GetStoreByIdAsync(int StoreId);
-
+    */
+    
     //Customers
     List<Customers> GetAllCustomers();
     Task<Customers> GetCustomerByIdAsync(int customerId);

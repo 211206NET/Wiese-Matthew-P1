@@ -35,6 +35,8 @@ builder.Services.AddScoped<IBL, CSBL>();
 //ORM code
 builder.Services.AddScoped<IStoreRepo, EFRepo>();
 builder.Services.AddScoped<IStoreBL, ClayStoreBL>();
+builder.Services.AddScoped<IGameRepo, EFGameRepo>();
+builder.Services.AddScoped<IGameBL, GameBL>();
 
 
 var app = builder.Build();

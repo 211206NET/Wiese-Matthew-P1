@@ -1,9 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
  <!-- TEST -->
-  <ItemGroup>
-    <ProjectReference Include="..\DL\DL.csproj" />
-    <ProjectReference Include="..\Models\Models.csproj" />
-  </ItemGroup>
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>

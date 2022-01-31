@@ -7,12 +7,14 @@ public interface IBL
     //interface members are implicitely public
     //they also lack method body
 
+    /*
     //Stores
     List<Store> GetAllStores();
     void AddStore(Store storeToAdd);
     void ChangeStoreInfo(Store changeStoreInfo);
     Task<Store> GetStoreByIdAsync(int StoreId);
-
+    */
+    
     //Customers
     List<Customers> GetAllCustomers();
     Task<Customers> GetCustomerByIdAsync(int customerId);
