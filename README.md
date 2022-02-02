@@ -21,7 +21,7 @@ _______________________
 - [<span style="color:orange">Management</span>] Change store data (name, address, etc.)
 - [<span style="color:orange">Management</span>] Delete a store
 - [<span style="color:orange">Management</span>] Add new item, change item data, delete item
-- [<span style="color:orange">Management</span>]Check/Add/Alter inventory of stores
+- [<span style="color:orange">Management</span>] Check/Add/Alter inventory of stores
 _________________
 ### User Stories
 - As a customer, I sign up with my name and password
