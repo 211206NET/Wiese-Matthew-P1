@@ -40,9 +40,9 @@ ____________________
 - MS SQL Dat
 ____________________
 ### Getting Started
-Download dotnet SDK or dotnet Run Time, and Visual Studio
-Clone the repo git clone https://github.com/211206NET/Wiese-Matthew-P1.git
-Navigate to WebAPI folder and run the program using Vistual Studio
+- Download dotnet SDK or dotnet Run Time, and Visual Studio
+- Clone the repo git clone https://github.com/211206NET/Wiese-Matthew-P1.git
+- Navigate to WebAPI folder and run the program using Vistual Studio
 ____________________
 ### Usage
 - Only Store is currently fucntional as the AWS RDS was shutdown. 
