@@ -2,14 +2,17 @@
 __________________________
 ___________________
 
-### Tech Stack
+### Project Description
+Matthew's Clay Shops are art stores that specialize in all kinds of professional art clays, but mainly clay for claymation animation. Plasticine modeling clay is the clay of choice for claymators. It never hardens, and has great malleability. These stores also sell various hand tools for shaping clay and large studio equipment such as tables and light fixtures. 
+
+### Technologies Used
 - C#
 - Xunit
 - AWS RDS SQLServer DB
 - ADO.NET
 - ASP.NET Core WEB API
 _______________________
-### Functionality
+### Features
 - Add a new customer
 - Login existing customer
 - Login as manager
@@ -34,8 +37,13 @@ ____________________
 - Serilog
 - Unit Test
 - ER Diagram
-- MS SQL Database
-
+- MS SQL Dat
+____________________
+### Getting Started
+???
+____________________
+### Usage
+- Only Store is currently fucntional as the AWS RDS was shutdown. 
 
 
 
