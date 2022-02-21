@@ -45,7 +45,7 @@ ____________________
 - Navigate to WebAPI folder and run the program using Vistual Studio
 ____________________
 ### Usage
-- Only Store is currently fucntional as the AWS RDS was shutdown. 
+- Only Store is currently functional as the AWS RDS was shutdown. 
 
 
 
